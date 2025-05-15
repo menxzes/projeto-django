@@ -1,6 +1,10 @@
+from time import timezone
+from django.http import JsonResponse
 from django.shortcuts import redirect, render, get_object_or_404
 from .models import Servico, Profissional
 from.forms import AgendamentoForm
+from django.views.decorators.csrf import csrf_exempt
+import json
 
 def lista_servicos(request):
     servicos = Servico.objects.filter(ativo=True)
@@ -22,7 +26,30 @@ def horarios_disponiveis(request, servico_id):
         form = AgendamentoForm()
     
     return render(request, 'agendamentos/horarios_disponiveis.html', {
+        # 'hoje': timezone.now().date()
         'servico': servico,
         'profissionais': profissionais,
         'form': form
     })
+
+@csrf_exempt
+def api_horarios(request):
+    profissional_id = request.GET.get('profissional_id')
+
+    try:
+        profissional = Profissional.objects.get(id=profissional_id)
+
+        # Verificação para debug dos dados no console
+        print(f"Horários encontrados: {profissional.horarios_disponiveis}")
+        print(f"Tipo dos dados: {type(profissional.horarios_disponiveis)}")
+
+        return JsonResponse({
+            'horarios': profissional.horarios_disponiveis,
+            'status': 'success'
+        }, json_dumps_params={'ensure_ascii': False})
+    
+    except Exception as e:
+        return JsonResponse({
+            'error': str(e),
+            'status': 'error'
+        }, status=500)

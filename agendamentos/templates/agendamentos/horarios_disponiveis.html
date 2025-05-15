@@ -1,36 +1,125 @@
 {% extends "agendamentos/base.html" %}
 
 {% block content %}
-<div class="row">
-    <div class="col-md-8 mx-auto">
-        <h2>Agendar {{ servico.nome }}</h2>
-        
-        <div class="card mt-4">
-            <div class="card-header">
-                Profissionais Disponíveis
-            </div>
-            <ul class="list-group list-group-flush">
-                {% for prof in profissionais %}
-                <li class="list-group-item">
-                    <h5>{{ prof.usuario.get_full_name }}</h5>
-                    <p class="mb-1">
-                        Horários: 
-                        {% for hora in prof.horarios_disponiveis %}
-                            <a href="#" class="btn btn-sm btn-outline-primary me-1">{{ hora }}</a>
-                        {% endfor %}
-                    </p>
-                </li>
-                {% empty %}
-                <li class="list-group-item text-danger">
-                    Nenhum profissional disponível para este serviço.
-                </li>
-                {% endfor %}
-            </ul>
+<div class="container mt-4">
+    <!-- Cabeçalho com nome do serviço -->
+    <h2 class="mb-4">Agendar {{ servico.nome }}</h2>
+    
+    <!-- Card para organização visual -->
+    <div class="card shadow">
+        <div class="card-body">
+            <!-- Formulário principal (POST para a mesma URL) -->
+            <form method="post">
+                {% csrf_token %} 
+                
+                <!-- Seção Profissional -->
+                <div class="mb-3">
+                    <label for="id_profissional" class="form-label fw-bold">
+                        <i class="bi bi-person-gear"></i> Profissional:
+                    </label>
+                    {{ form.profissional }}
+                    <div class="form-text">Escolha o profissional desejado</div>
+                </div>
+                
+                <!-- Seção Data -->
+                <div class="mb-3">
+                    <label for="id_data" class="form-label fw-bold">
+                        <i class="bi bi-calendar"></i> Data:
+                    </label>
+                    <input type="date" 
+                           name="data" 
+                           id="id_data" 
+                           class="form-control"
+                           min="{{ hoje|date:'Y-m-d' }}">  <!-- Impede datas passadas -->
+                </div>
+                
+                <!-- Seção Horário -->
+                <div class="mb-3">
+                    <label class="form-label fw-bold">Horário:</label>
+                    <select name="horario" id="id_horario" class="form-select" required disabled>
+                        <option value="" disabled selected>Selecione um profissional primeiro</option>
+                    </select>
+                    <div id="horario-error" class="error-message"></div>
+                </div>
+                
+                <!-- Botão de submit -->
+                <div class="d-grid gap-2 mt-4">
+                    <button type="submit" class="btn btn-primary btn-lg">
+                        <i class="bi bi-check-circle"></i> Confirmar Agendamento
+                    </button>
+                </div>
+            </form>
         </div>
-        
-        <a href="{% url 'lista_servicos' %}" class="btn btn-secondary mt-3">
-            Voltar
+    </div>
+    
+    <!-- Link de volta -->
+    <div class="mt-3">
+        <a href="{% url 'lista_servicos' %}" class="text-decoration-none">
+            <i class="bi bi-arrow-left"></i> Voltar para serviços
         </a>
     </div>
 </div>
+
+<!-- JavaScript para carregar horários dinamicamente -->
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    const profissionalSelect = document.getElementById("id_profissional");
+    const horarioSelect = document.getElementById("id_horario");
+    const errorDiv = document.getElementById("horario-error");
+
+    profissionalSelect.addEventListener("change", async function() {
+        const profissionalId = this.value;
+        
+        if (!profissionalId) {
+            resetHorarios();
+        }
+
+        try {
+            horarioSelect.innerHTML = '<option value="">Carregando...</option>';
+            horarioSelect.disabled = false;
+            
+            const response = await fetch(`/api/horarios/?profissional_id=${profissionalId}`);
+            console.log("Resposta da API:", response);  // Debug
+            
+            const data = await response.json();
+            console.log("Dados recebidos:", data);  // Debug
+            
+            if (!response.ok) throw new Error(data.error || "Erro desconhecido");
+            
+            if (!data.horarios || data.horarios.length === 0) {
+                throw new Error("Nenhum horário cadastrado para este profissional");
+            }
+
+            // Preenche os horários
+            horarioSelect.innerHTML = '';
+            data.horarios.forEach(hora => {
+                const option = new Option(hora, hora);
+                horarioSelect.add(option);
+            });
+            
+            errorDiv.textContent = '';
+            
+        } catch (error) {
+            console.error("Erro detalhado:", error);
+            horarioSelect.innerHTML = '<option value="" disabled>Erro ao carregar</option>';
+            errorDiv.textContent = error.message;
+        }
+    });
+
+    function resetHorarios() {
+        horarioSelect.innerHTML = '<option value="" disabled selected>Selecione um profissional</option>';
+        horarioSelect.disabled = true;
+        errorDiv.textContent = '';
+    }
+});
+</script>
+
+<style>
+    .card {
+        border-radius: 15px;
+    }
+    .form-label {
+        color: #495057;
+    }
+</style>
 {% endblock %}

@@ -9,14 +9,18 @@ class ServicoAdmin(admin.ModelAdmin):
 
 @admin.register(Profissional)
 class ProfissionalAdmin(admin.ModelAdmin):
-    list_display = ('usuario', 'servico', 'horarios_formatados')
+    list_display = ('get_nome_profissional', 'servico', 'horarios_formatados')
     list_filter = ('servico',)
     search_fields = ('usuario__username', 'usuario__first_name', 'usuario__last_name')
-    autocomplete_fields = ['usuario']  # Agora vai funcionar
+    autocomplete_fields = ['usuario']
     
+    def get_nome_profissional(self, obj):
+        return obj.usuario.get_full_name() or obj.usuario.username
+    get_nome_profissional.short_description = 'Profissional'
+
     def horarios_formatados(self, obj):
         return ", ".join(obj.horarios_disponiveis)
-    horarios_formatados.short_description = 'Horários Disponíveis'
+    horarios_formatados.short_description = 'Horários'
 
 @admin.register(Agendamento)
 class AgendamentoAdmin(admin.ModelAdmin):
