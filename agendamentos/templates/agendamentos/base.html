@@ -16,5 +16,12 @@
         <h1 class="mb-4">Agenda Fácil</h1>
         {% block content %}{% endblock %}
     </div>
+    {% if user.is_authenticated %}
+    <li class="nav-item">
+        <a class="nav-link" href="{% url 'meus_agendamentos' %}">
+            <i class="bi bi-calendar-check"></i> Meus Agendamentos
+        </a>
+    </li>
+    {% endif %}
 </body>
 </html>

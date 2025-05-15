@@ -1,10 +1,10 @@
 from time import timezone
 from django.http import JsonResponse
 from django.shortcuts import redirect, render, get_object_or_404
-from .models import Servico, Profissional
+from .models import Agendamento, Servico, Profissional
 from.forms import AgendamentoForm
 from django.views.decorators.csrf import csrf_exempt
-import json
+from django.contrib.auth.decorators import login_required
 
 def lista_servicos(request):
     servicos = Servico.objects.filter(ativo=True)
@@ -53,3 +53,14 @@ def api_horarios(request):
             'error': str(e),
             'status': 'error'
         }, status=500)
+
+@login_required
+def meus_agendamentos(request):
+    agendamentos = Agendamento.objects.filter(
+        cliente = request.user,
+        status = 'A',
+    ). order_by('data', 'horario')
+
+    return render(request, 'agendamentos/meus_agendamentos.html', {
+        'agendamentos': agendamentos
+    })

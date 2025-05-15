@@ -1,0 +1,42 @@
+{% extends "agendamentos/base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <h2 class="mb-4">Meus Agendamentos</h2>
+    
+    {% if agendamentos %}
+    <div class="table-responsive">
+        <table class="table table-striped">
+            <thead>
+                <tr>
+                    <th>Data</th>
+                    <th>Horário</th>
+                    <th>Serviço</th>
+                    <th>Profissional</th>
+                    <th>Ações</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for agendamento in agendamentos %}
+                <tr>
+                    <td>{{ agendamento.data|date:"d/m/Y" }}</td>
+                    <td>{{ agendamento.horario }}</td>
+                    <td>{{ agendamento.servico.nome }}</td>
+                    <td>{{ agendamento.profissional.usuario.get_full_name }}</td>
+                    <td>
+                        <a href="#" class="btn btn-sm btn-outline-danger">
+                            Cancelar
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        Você não possui agendamentos ativos.
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
