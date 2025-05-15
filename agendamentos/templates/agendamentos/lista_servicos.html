@@ -15,9 +15,13 @@
                 <span class="badge bg-primary rounded-pill">R$ {{ servico.preco }}</span>
             </a>
             {% empty %}
+            {% if profissionais %}
+            <!-- Mostra lista de profissionais -->
+            {% else %}
             <div class="alert alert-warning">
                 Nenhum serviço disponível no momento.
             </div>
+            {% endif %}
             {% endfor %}
         </div>
     </div>
