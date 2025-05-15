@@ -2,26 +2,43 @@
 
 {% block content %}
 <div class="container mt-4">
-    <!-- Cabeçalho com nome do serviço -->
     <h2 class="mb-4">Agendar {{ servico.nome }}</h2>
     
-    <!-- Card para organização visual -->
+    <!-- Mensagens de erro não associadas a campos específicos -->
+    {% if form.non_field_errors %}
+    <div class="alert alert-danger">
+        {% for error in form.non_field_errors %}
+            <p class="mb-0"><i class="bi bi-exclamation-triangle-fill"></i> {{ error }}</p>
+        {% endfor %}
+    </div>
+    {% endif %}
+
     <div class="card shadow">
         <div class="card-body">
-            <!-- Formulário principal (POST para a mesma URL) -->
-            <form method="post">
-                {% csrf_token %} 
+            <form method="post" novalidate>
+                {% csrf_token %}
                 
-                <!-- Seção Profissional -->
+                <!-- Campo Profissional -->
                 <div class="mb-3">
                     <label for="id_profissional" class="form-label fw-bold">
                         <i class="bi bi-person-gear"></i> Profissional:
                     </label>
-                    {{ form.profissional }}
+                    <select name="profissional" id="id_profissional" class="form-select {% if form.profissional.errors %}is-invalid{% endif %}">
+                        {% for choice in form.profissional.field.choices %}
+                            <option value="{{ choice.0 }}" {% if choice.0 == form.profissional.value %}selected{% endif %}>
+                                {{ choice.1 }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                    {% if form.profissional.errors %}
+                        <div class="invalid-feedback">
+                            {{ form.profissional.errors.0 }}
+                        </div>
+                    {% endif %}
                     <div class="form-text">Escolha o profissional desejado</div>
                 </div>
                 
-                <!-- Seção Data -->
+                <!-- Campo Data -->
                 <div class="mb-3">
                     <label for="id_data" class="form-label fw-bold">
                         <i class="bi bi-calendar"></i> Data:
@@ -29,20 +46,35 @@
                     <input type="date" 
                            name="data" 
                            id="id_data" 
-                           class="form-control"
-                           min="{{ hoje|date:'Y-m-d' }}">  <!-- Impede datas passadas -->
+                           class="form-control {% if form.data.errors %}is-invalid{% endif %}"
+                           min="{{ hoje|date:'Y-m-d' }}"
+                           value="{{ form.data.value|default:'' }}">
+                    {% if form.data.errors %}
+                        <div class="invalid-feedback">
+                            {{ form.data.errors.0 }}
+                        </div>
+                    {% endif %}
                 </div>
                 
-                <!-- Seção Horário -->
+                <!-- Campo Horário -->
                 <div class="mb-3">
-                    <label class="form-label fw-bold">Horário:</label>
-                    <select name="horario" id="id_horario" class="form-select" required disabled>
-                        <option value="" disabled selected>Selecione um profissional primeiro</option>
+                    <label for="id_horario" class="form-label fw-bold">
+                        <i class="bi bi-clock"></i> Horário:
+                    </label>
+                    <select name="horario" id="id_horario" class="form-select {% if form.horario.errors %}is-invalid{% endif %}" required>
+                        {% for choice in form.horario.field.choices %}
+                            <option value="{{ choice.0 }}" {% if choice.0 == form.horario.value %}selected{% endif %}>
+                                {{ choice.1 }}
+                            </option>
+                        {% endfor %}
                     </select>
-                    <div id="horario-error" class="error-message"></div>
+                    {% if form.horario.errors %}
+                        <div class="invalid-feedback">
+                            {{ form.horario.errors.0 }}
+                        </div>
+                    {% endif %}
                 </div>
                 
-                <!-- Botão de submit -->
                 <div class="d-grid gap-2 mt-4">
                     <button type="submit" class="btn btn-primary btn-lg">
                         <i class="bi bi-check-circle"></i> Confirmar Agendamento
@@ -52,7 +84,6 @@
         </div>
     </div>
     
-    <!-- Link de volta -->
     <div class="mt-3">
         <a href="{% url 'lista_servicos' %}" class="text-decoration-none">
             <i class="bi bi-arrow-left"></i> Voltar para serviços
@@ -60,66 +91,57 @@
     </div>
 </div>
 
-<!-- JavaScript para carregar horários dinamicamente -->
+<!-- JavaScript para carregamento dinâmico -->
 <script>
 document.addEventListener("DOMContentLoaded", function() {
     const profissionalSelect = document.getElementById("id_profissional");
     const horarioSelect = document.getElementById("id_horario");
-    const errorDiv = document.getElementById("horario-error");
+    const dataInput = document.getElementById("id_data");
 
-    profissionalSelect.addEventListener("change", async function() {
-        const profissionalId = this.value;
+    // Carrega horários quando profissional ou data mudam
+    function carregarHorarios() {
+        const profissionalId = profissionalSelect.value;
+        const data = dataInput.value;
         
-        if (!profissionalId) {
-            resetHorarios();
-        }
-
-        try {
-            horarioSelect.innerHTML = '<option value="">Carregando...</option>';
-            horarioSelect.disabled = false;
-            
-            const response = await fetch(`/api/horarios/?profissional_id=${profissionalId}`);
-            console.log("Resposta da API:", response);  // Debug
-            
-            const data = await response.json();
-            console.log("Dados recebidos:", data);  // Debug
-            
-            if (!response.ok) throw new Error(data.error || "Erro desconhecido");
-            
-            if (!data.horarios || data.horarios.length === 0) {
-                throw new Error("Nenhum horário cadastrado para este profissional");
-            }
-
-            // Preenche os horários
-            horarioSelect.innerHTML = '';
-            data.horarios.forEach(hora => {
-                const option = new Option(hora, hora);
-                horarioSelect.add(option);
+        if (!profissionalId || !data) return;
+        
+        fetch(`/api/horarios/?profissional_id=${profissionalId}&data=${data}`)
+            .then(response => response.json())
+            .then(data => {
+                horarioSelect.innerHTML = '';
+                
+                if (data.horarios && data.horarios.length > 0) {
+                    data.horarios.forEach(hora => {
+                        const option = document.createElement("option");
+                        option.value = hora;
+                        option.textContent = hora;
+                        horarioSelect.appendChild(option);
+                    });
+                } else {
+                    horarioSelect.innerHTML = '<option value="" disabled>Nenhum horário disponível</option>';
+                }
+            })
+            .catch(error => {
+                console.error("Erro:", error);
+                horarioSelect.innerHTML = '<option value="" disabled>Erro ao carregar</option>';
             });
-            
-            errorDiv.textContent = '';
-            
-        } catch (error) {
-            console.error("Erro detalhado:", error);
-            horarioSelect.innerHTML = '<option value="" disabled>Erro ao carregar</option>';
-            errorDiv.textContent = error.message;
-        }
-    });
-
-    function resetHorarios() {
-        horarioSelect.innerHTML = '<option value="" disabled selected>Selecione um profissional</option>';
-        horarioSelect.disabled = true;
-        errorDiv.textContent = '';
     }
+
+    profissionalSelect.addEventListener("change", carregarHorarios);
+    dataInput.addEventListener("change", carregarHorarios);
 });
 </script>
 
+<!-- Estilos customizados -->
 <style>
     .card {
         border-radius: 15px;
     }
-    .form-label {
-        color: #495057;
+    .invalid-feedback {
+        display: block;
+    }
+    .is-invalid {
+        border-color: #dc3545;
     }
 </style>
 {% endblock %}

@@ -1,3 +1,4 @@
+from datetime import datetime
 from django.db import models
 from django.core.exceptions import ValidationError
 from django.utils import timezone
@@ -128,21 +129,35 @@ class Agendamento(models.Model):
         ]
 
     def clean(self):
-        # Validações complexas
-        if self.data < timezone.now().date():
-            raise ValidationError(
-                {'data': 'Não é possível agendar para datas passadas.'}
-            )
-        
-        if self.status == 'A' and Agendamento.objects.filter(
+        super().clean()
+
+        conflitos = Agendamento.objects.filter(
             profissional=self.profissional,
             data=self.data,
             horario=self.horario,
             status='A'
-        ).exclude(pk=self.pk).exists():
+        ).exclude(pk=self.pk)
+
+        if conflitos.exists():
             raise ValidationError(
-                {'horario': 'Este horário já está agendado para o profissional.'}
+                f"Horário já ocupado pelo cliente {conflitos.first().cliente.username}"
             )
+        
+        try:
+            # Converte o horário string para objeto time
+            hora_obj = datetime.strptime(self.horario, '%H:%M').time()
+            
+            # Combina com a data e adiciona o fuso horário
+            data_hora_agendamento = timezone.make_aware(
+                datetime.combine(self.data, hora_obj)
+            )
+            
+            # Compara com o horário atual (ambos com fuso horário)
+            if data_hora_agendamento < timezone.now():
+                raise ValidationError("Não é possível agendar no passado")
+                
+        except ValueError as e:
+            raise ValidationError("Formato de horário inválido. Use HH:MM")
 
     def __str__(self):
         return (
