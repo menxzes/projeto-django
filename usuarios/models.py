@@ -39,8 +39,8 @@ class CustomUser(AbstractUser):
     )
     
     class Meta:
-        verbose_name = 'Usuário'
-        verbose_name_plural = 'Usuários'
+        verbose_name = "Usuário do Sistema"
+        verbose_name_plural = "Usuários do Sistema"
     
     def __str__(self):
         return f"{self.get_full_name()} ({self.get_tipo_display()})"
