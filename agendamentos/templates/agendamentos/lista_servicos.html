@@ -1,0 +1,25 @@
+{% extends "agendamentos/base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <h2 class="mb-4">Escolha seu serviço:</h2>
+
+        <div class="list-group">
+            {% for servico in servicos %}
+            <a href="{% url 'horarios_disponiveis' servico.id %}" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                <div>
+                    <strong>{{ servico.nome }}</strong>
+                    <p class="mb-0 text-muted">{{ servico.descricao|default:"Sem descrição" }}</p>
+                </div>
+                <span class="badge bg-primary rounded-pill">R$ {{ servico.preco }}</span>
+            </a>
+            {% empty %}
+            <div class="alert alert-warning">
+                Nenhum serviço disponível no momento.
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,36 @@
+{% extends "agendamentos/base.html" %}
+
+{% block content %}
+<div class="row">
+    <div class="col-md-8 mx-auto">
+        <h2>Agendar {{ servico.nome }}</h2>
+        
+        <div class="card mt-4">
+            <div class="card-header">
+                Profissionais Disponíveis
+            </div>
+            <ul class="list-group list-group-flush">
+                {% for prof in profissionais %}
+                <li class="list-group-item">
+                    <h5>{{ prof.usuario.get_full_name }}</h5>
+                    <p class="mb-1">
+                        Horários: 
+                        {% for hora in prof.horarios_disponiveis %}
+                            <a href="#" class="btn btn-sm btn-outline-primary me-1">{{ hora }}</a>
+                        {% endfor %}
+                    </p>
+                </li>
+                {% empty %}
+                <li class="list-group-item text-danger">
+                    Nenhum profissional disponível para este serviço.
+                </li>
+                {% endfor %}
+            </ul>
+        </div>
+        
+        <a href="{% url 'lista_servicos' %}" class="btn btn-secondary mt-3">
+            Voltar
+        </a>
+    </div>
+</div>
+{% endblock %}
