@@ -2,6 +2,18 @@
 
 {% block content %}
 <div class="container mt-4">
+
+    {% if messages %}
+    <div class="container mt-3">
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show">
+            {{ message }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+
     <h2 class="mb-4">Meus Agendamentos</h2>
     
     {% if agendamentos %}
@@ -24,9 +36,13 @@
                     <td>{{ agendamento.servico.nome }}</td>
                     <td>{{ agendamento.profissional.usuario.get_full_name }}</td>
                     <td>
-                        <a href="#" class="btn btn-sm btn-outline-danger">
-                            Cancelar
-                        </a>
+                        <form method="post" action="{% url 'cancelar_agendamento' agendamento.id %}">
+                            {% csrf_token %}
+                            <button type="submit" class="btn btn-sm btn-outline-danger"
+                                    onclick="return confirm('Tem certeza que deseja cancelar este agendamento?')">
+                                <i class="bi bi-x-circle"></i> Cancelar
+                            </button>
+                        </form>
                     </td>
                 </tr>
                 {% endfor %}

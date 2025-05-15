@@ -16,8 +16,13 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
+from core.views import redirecionar_por_tipo
 
 urlpatterns = [
     path('admin/', admin.site.urls),
     path('', include('agendamentos.urls')),
+    path('', include('django.contrib.auth.urls')),
+    path('registro/', include('usuarios.urls')),
+    path('inicio/', redirecionar_por_tipo, name='redirecionar_por_tipo'),
+    path('', include('usuarios.urls')),
 ]

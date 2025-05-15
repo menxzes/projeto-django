@@ -160,8 +160,11 @@ class Agendamento(models.Model):
             raise ValidationError("Formato de horário inválido. Use HH:MM")
 
     def cancelar(self):
-        self.status = 'C'
-        self.save()
+        if self.status == 'A':
+            self.status = 'C'
+            self.save()
+            return True
+        return False
 
     def __str__(self):
         return (
