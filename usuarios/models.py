@@ -9,22 +9,26 @@ class CustomUser(AbstractUser):
         ('A', 'Administrador'),
     ]
     
-    tipo = models.CharField(max_length=1, choices=TIPO_CHOICES, default='C')
-    
     cpf = models.CharField(
         max_length=11,
         unique=True,
         null=False, 
         blank=False,
-        default='00000000000'
+        default='00000000000',
+        validators=[RegexValidator(r'^\d{11}$', 'CPF deve conter 11 dígitos')],
+        help_text="Somente números",
     )
 
     telefone = models.CharField(
         max_length=15,
         null=False,
         blank=False, 
-        default=''
+        default='+5500000000000',
+        validators=[RegexValidator(r'^\+?1?\d{9,15}$', 'Formato: +5599999999999')],
     )
+    
+    
+    tipo = models.CharField(max_length=1, choices=TIPO_CHOICES, default='C')
     
     class Meta:
         verbose_name = "Usuário do Sistema"

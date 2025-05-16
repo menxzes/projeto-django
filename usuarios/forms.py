@@ -1,32 +1,39 @@
-# usuarios/forms.py
 from django import forms
 from django.contrib.auth.forms import UserCreationForm
-from .models import CustomUser
 from django.core.exceptions import ValidationError
+from .models import CustomUser
+import re
 
 class RegistroForm(UserCreationForm):
     cpf = forms.CharField(
         max_length=11,
         required=True,
-        help_text="Digite apenas números (11 dígitos)",
-        widget=forms.TextInput(attrs={'pattern': r'\d{11}', 'title': '11 dígitos numéricos'})
+        widget=forms.TextInput(attrs={'placeholder': '00000000000'})
+    )
+    
+    telefone = forms.CharField(
+        max_length=15,
+        required=False,
+        widget=forms.TextInput(attrs={'placeholder': '+5511999999999'})
     )
 
     class Meta:
         model = CustomUser
-        fields = ['username', 'first_name', 'last_name', 'email', 'cpf', 'password1', 'password2']
-
+        fields = ['username', 'first_name', 'last_name', 'email', 'cpf', 'telefone', 'password1', 'password2']
+        
     def clean_cpf(self):
         cpf = self.cleaned_data['cpf']
+        if not re.match(r'^\d{11}$', cpf):
+            raise ValidationError("CPF deve conter exatamente 11 dígitos")
         
-        if len(cpf) != 11 or not cpf.isdigit():
-            raise ValidationError("CPF deve conter exatamente 11 dígitos numéricos")
-        
-        if CustomUser.objects.filter(cpf=cpf).exists():
-            raise ValidationError("Este CPF já está cadastrado")
+        # Verifica se todos os dígitos são iguais (ex: 00000000000)
+        if len(set(cpf)) == 1:
+            raise ValidationError("CPF inválido")
             
         return cpf
-
-    def clean_email(self):
-        email = self.cleaned_data['email']
-        return email.lower()
+    
+    def clean_telefone(self):
+        telefone = self.cleaned_data['telefone']
+        if telefone and not re.match(r'^\+?1?\d{9,15}$', telefone):
+            raise ValidationError("Formato: +5599999999999")
+        return telefone

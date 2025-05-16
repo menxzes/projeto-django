@@ -17,6 +17,9 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from core.views import redirecionar_por_tipo
+from django.views.generic import RedirectView
+from usuarios import views as usuarios_views
+from usuarios.views import registro
 
 urlpatterns = [
     path('admin/', admin.site.urls),
@@ -25,4 +28,8 @@ urlpatterns = [
     path('registro/', include('usuarios.urls')),
     path('inicio/', redirecionar_por_tipo, name='redirecionar_por_tipo'),
     path('', include('usuarios.urls')),
+    path('', usuarios_views.registro, name='home'),
+    path('admin/', admin.site.urls),
+    path('login/', include('django.contrib.auth.urls')),
+    path('registro/', usuarios_views.registro, name='registro'),
 ]
