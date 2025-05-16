@@ -1,6 +1,7 @@
 from django import forms
 from django.forms import ValidationError
 from .models import Agendamento
+from .models import Profissional
 
 class AgendamentoForm(forms.ModelForm):
     def __init__(self, *args, **kwargs):
@@ -28,3 +29,8 @@ class AgendamentoForm(forms.ModelForm):
             'data': forms.DateInput(attrs={'type': 'date'}),
             'horario': forms.Select(attrs={'disabled': True})
         }
+
+class ProfissionalForm(forms.ModelForm):
+    class Meta:
+        model = Profissional
+        fields = ['usuario', 'especialidade']

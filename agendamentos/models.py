@@ -57,6 +57,18 @@ class Profissional(models.Model):
         help_text='Lista de horários no formato ["08:00", "09:00", ...]'
     )
 
+    usuario = models.OneToOneField(CustomUser, on_delete=models.CASCADE, related_name='profissional')
+    especialidade = models.CharField(
+        max_length=100,
+        blank=False,
+        null=False,
+        default="Especialidade",
+        help_text="Informe a especialidade do profissional"
+    )
+
+    def __str__(self):
+        return f"{self.usuario.get_full_name()} - {self.especialidade}"
+
     class Meta:
         verbose_name = 'Profissional'
         verbose_name_plural = 'Profissionais'

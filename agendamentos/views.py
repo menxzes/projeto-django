@@ -1,11 +1,11 @@
+from django.shortcuts import redirect, render, get_object_or_404
 from django.utils import timezone
 from django.http import JsonResponse
-from django.shortcuts import redirect, render, get_object_or_404
-from .models import Agendamento, Servico, Profissional
-from.forms import AgendamentoForm
-from django.views.decorators.csrf import csrf_exempt
-from django.contrib.auth.decorators import login_required
 from django.contrib import messages
+from django.contrib.auth.decorators import login_required, user_passes_test
+from django.views.decorators.csrf import csrf_exempt
+from .models import Agendamento, Servico, Profissional
+from.forms import AgendamentoForm, ProfissionalForm
 
 def lista_servicos(request):
     servicos = Servico.objects.filter(ativo=True)
@@ -88,3 +88,41 @@ def redirecionamento_pos_login(request):
     else:
         return redirect('meus_agendamentos')
 
+def is_admin(user):
+    return user.is_authenticated and user.is_staff
+
+@user_passes_test(is_admin)
+def lista_profissionais(request):
+    profissionais = Profissional.objects.select_related('usuario').all()
+    return render(request, 'agendamentos/profissionais/lista.html', {'profissionais': profissionais})
+
+@user_passes_test(is_admin)
+def criar_profissional(request):
+    if request.method == 'POST':
+        form = ProfissionalForm(request.POST)
+        if form.is_valid():
+            form.save()
+            return redirect('lista_profissionais')
+    else:
+        form = ProfissionalForm()
+    return render(request, 'agendamentos/profissionais/form.html', {'form': form, 'titulo': 'Novo Profissional'})
+
+@user_passes_test(is_admin)
+def editar_profissional(request, profissional_id):
+    profissional = get_object_or_404(Profissional, id=profissional_id)
+    if request.method == 'POST':
+        form = ProfissionalForm(request.POST, instance=profissional)
+        if form.is_valid():
+            form.save()
+            return redirect('lista_profissionais')
+    else:
+        form = ProfissionalForm(instance=profissional)
+    return render(request, 'agendamentos/profissionais/form.html', {'form': form, 'titulo': 'Editar Profissional'})
+
+@user_passes_test(is_admin)
+def excluir_profissional(request, profissional_id):
+    profissional = get_object_or_404(Profissional, id=profissional_id)
+    if request.method == 'POST':
+        profissional.delete()
+        return redirect('lista_profissionais')
+    return render(request, 'agendamentos/profissionais/confirmar_exclusao.html', {'profissional': profissional})
