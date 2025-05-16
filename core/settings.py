@@ -132,8 +132,10 @@ STATIC_URL = 'static/'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'usuarios.CustomUser'
-LOGIN_REDIRECT_URL = 'meus_agendamentos'
-LOGIN_URL = '/login/'
-LOGOUT_REDIRECT_URL = 'home'
+
+LOGIN_URL = 'login'
+LOGIN_REDIRECT_URL = '/pos-login/'
+LOGOUT_REDIRECT_URL = 'login'
+
 
 ADMIN_LOGIN_REDIRECT_URL = '/admin/'

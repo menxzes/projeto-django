@@ -57,15 +57,13 @@ def api_horarios(request):
 
 @login_required
 def meus_agendamentos(request):
-
-    agendamentos = Agendamento.objects.filter(
-        cliente = request.user,
-        status = 'A',
-    ). order_by('data', 'horario')
-
-    return render(request, 'agendamentos/meus_agendamentos.html', {
+    if request.user.is_staff:
+        return redirect('admin:index')
+    agendamentos = Agendamento.objects.filter(cliente=request.user).order_by('data', 'horario')
+    context = {
         'agendamentos': agendamentos
-    })
+    }
+    return render(request, 'agendamentos/meus_agendamentos.html', context)
 
 @login_required
 def cancelar_agendamento(request, agendamento_id):
@@ -82,3 +80,11 @@ def cancelar_agendamento(request, agendamento_id):
         messages.error(request, "Este agendamento já foi cancelado ou finalizado")
     
     return redirect('meus_agendamentos')
+
+@login_required
+def redirecionamento_pos_login(request):
+    if request.user.is_staff:
+        return redirect('admin:index')  # Ou substitua por uma view personalizada
+    else:
+        return redirect('meus_agendamentos')
+

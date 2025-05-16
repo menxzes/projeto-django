@@ -12,18 +12,16 @@ class CustomUser(AbstractUser):
     cpf = models.CharField(
         max_length=11,
         unique=True,
-        null=False, 
+        null=False,
         blank=False,
-        default='00000000000',
         validators=[RegexValidator(r'^\d{11}$', 'CPF deve conter 11 dígitos')],
         help_text="Somente números",
     )
 
     telefone = models.CharField(
         max_length=15,
-        null=False,
-        blank=False, 
-        default='+5500000000000',
+        null=True,
+        blank=True,
         validators=[RegexValidator(r'^\+?1?\d{9,15}$', 'Formato: +5599999999999')],
     )
     
@@ -44,3 +42,8 @@ class CustomUser(AbstractUser):
     @property
     def is_admin(self):
         return self.tipo == 'A'
+    
+    def save(self, *args, **kwargs):
+        # Sincroniza o campo is_staff com o tipo do usuário
+        self.is_staff = True if self.tipo == 'A' else False
+        super().save(*args, **kwargs)

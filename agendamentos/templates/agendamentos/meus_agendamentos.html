@@ -49,10 +49,16 @@
             </tbody>
         </table>
     </div>
+    <a href="{% url 'lista_servicos' %}" class="btn btn-success mt-4">
+        <i class="bi bi-plus-circle"></i> Agendar novo serviço
+    </a>
     {% else %}
     <div class="alert alert-info">
         Você não possui agendamentos ativos.
     </div>
+    <a href="{% url 'lista_servicos' %}" class="btn btn-primary mt-3">
+        <i class="bi bi-plus-circle"></i> Agendar novo serviço
+    </a>
     {% endif %}
 </div>
 {% endblock %}

@@ -16,21 +16,12 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from core.views import redirecionar_por_tipo
+from core.views import redirecionar_por_tipo, index
 from usuarios.views import registro
 
 urlpatterns = [
+    path('', index, name='index'),  # <- colocar isso ANTES dos includes!
     path('admin/', admin.site.urls),
-    
-    # Rota principal: redireciona usuários após login com base no tipo
-    path('inicio/', redirecionar_por_tipo, name='redirecionar_por_tipo'),
-
-    # App de agendamentos
-    path('', include('agendamentos.urls')),
-
-    # Autenticação: login, logout, password_reset etc.
-    path('', include('django.contrib.auth.urls')),
-
-    # Registro de usuários (rota direta, sem necessidade de include extra)
-    path('registro/', registro, name='registro'),
+    path('agendamentos/', include('agendamentos.urls')),
+    path('usuarios/', include('usuarios.urls')),
 ]

@@ -26,7 +26,6 @@ class RegistroForm(UserCreationForm):
         if not re.match(r'^\d{11}$', cpf):
             raise ValidationError("CPF deve conter exatamente 11 dígitos")
         
-        # Verifica se todos os dígitos são iguais (ex: 00000000000)
         if len(set(cpf)) == 1:
             raise ValidationError("CPF inválido")
             
@@ -37,3 +36,11 @@ class RegistroForm(UserCreationForm):
         if telefone and not re.match(r'^\+?1?\d{9,15}$', telefone):
             raise ValidationError("Formato: +5599999999999")
         return telefone
+    
+    def save(self, commit=True):
+        user = super().save(commit=False)
+        user.tipo = 'C'         # Garante que o usuário é cliente
+        user.is_staff = False   # Garantia extra que cliente não terá acesso admin
+        if commit:
+            user.save()
+        return user
