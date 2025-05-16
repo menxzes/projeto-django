@@ -17,19 +17,20 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path, include
 from core.views import redirecionar_por_tipo
-from django.views.generic import RedirectView
-from usuarios import views as usuarios_views
 from usuarios.views import registro
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('agendamentos.urls')),
-    path('', include('django.contrib.auth.urls')),
-    path('registro/', include('usuarios.urls')),
+    
+    # Rota principal: redireciona usuários após login com base no tipo
     path('inicio/', redirecionar_por_tipo, name='redirecionar_por_tipo'),
-    path('', include('usuarios.urls')),
-    path('', usuarios_views.registro, name='home'),
-    path('admin/', admin.site.urls),
-    path('login/', include('django.contrib.auth.urls')),
-    path('registro/', usuarios_views.registro, name='registro'),
+
+    # App de agendamentos
+    path('', include('agendamentos.urls')),
+
+    # Autenticação: login, logout, password_reset etc.
+    path('', include('django.contrib.auth.urls')),
+
+    # Registro de usuários (rota direta, sem necessidade de include extra)
+    path('registro/', registro, name='registro'),
 ]

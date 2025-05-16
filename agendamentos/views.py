@@ -1,4 +1,4 @@
-from time import timezone
+from django.utils import timezone
 from django.http import JsonResponse
 from django.shortcuts import redirect, render, get_object_or_404
 from .models import Agendamento, Servico, Profissional
@@ -27,7 +27,7 @@ def horarios_disponiveis(request, servico_id):
         form = AgendamentoForm()
     
     return render(request, 'agendamentos/horarios_disponiveis.html', {
-        # 'hoje': timezone.now().date()
+        'hoje': timezone.now().date(),
         'servico': servico,
         'profissionais': profissionais,
         'form': form
