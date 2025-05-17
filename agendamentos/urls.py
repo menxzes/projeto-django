@@ -1,6 +1,13 @@
 from django.urls import path
 from . import views
 from .views import meus_agendamentos
+from .views_admin import(
+    Lista_profissionais,
+    Criar_profissional,
+    Editar_profissional,
+    Excluir_profissional,
+)
+
 
 urlpatterns = [
     path('servicos/', views.lista_servicos, name='lista_servicos'),
@@ -8,10 +15,14 @@ urlpatterns = [
     path('api/horarios/', views.api_horarios, name='api_horarios'),
     path('cancelar/<int:agendamento_id>/', views.cancelar_agendamento, name='cancelar_agendamento'),
     path('meus-agendamentos/', meus_agendamentos, name='meus_agendamentos'),
-    path('pos-login/', views.redirecionamento_pos_login, name='redirecionamento_pos_login'),
-    path('profissionais/', views.lista_profissionais, name='lista_profissionais'),
-    path('profissionais/novo/', views.criar_profissional, name='criar_profissional'),
-    path('profissionais/<int:profissional_id>/editar/', views.editar_profissional, name='editar_profissional'),
-    path('profissionais/<int:profissional_id>/excluir/', views.excluir_profissional, name='excluir_profissional'),
-    
+    path('pos-login/', views.redirecionamento_pos_login, name='redirecionamento_pos_login'),    
 ]
+
+admin_urls = [
+    path('admin_painel/profissionais/', Lista_profissionais.as_view(),   name='lista_profissionais'),
+    path('admin_painel/profissionais/novo/', Criar_profissional.as_view(),  name='criar_profissional'),
+    path('admin_painel/profissionais/<int:pk>/editar/', Editar_profissional.as_view(), name='editar_profissional'),
+    path('admin_painel/profissionais/<int:pk>/excluir/', Excluir_profissional.as_view(), name='excluir_profissional'),
+]
+
+urlpatterns += admin_urls

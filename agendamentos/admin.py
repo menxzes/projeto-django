@@ -1,5 +1,8 @@
 from django.contrib import admin
 from .models import Servico, Profissional, Agendamento
+from django.utils.html import format_html
+from django.urls import reverse
+from django.shortcuts import redirect
 
 @admin.register(Servico)
 class ServicoAdmin(admin.ModelAdmin):
@@ -28,3 +31,18 @@ class AgendamentoAdmin(admin.ModelAdmin):
     list_filter = ('status', 'data', 'profissional__servico')
     search_fields = ('cliente__first_name', 'profissional__usuario__first_name')
     date_hierarchy = 'data'
+
+class PainelSalaoLink(admin.ModelAdmin):
+    verbose_name_plural = '▶ Painel do Salão'  
+
+    def changelist_view(self, request, extra_context=None):
+        return redirect('/admin_painel/profissionais/')
+
+from django.db import models
+class Dummy(models.Model):
+    class Meta:
+        managed = False
+        verbose_name = 'Painel do Salão Link'
+        verbose_name_plural = '▶ Painel do Salão'
+
+admin.site.register(Dummy, PainelSalaoLink)

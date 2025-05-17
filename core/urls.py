@@ -26,10 +26,5 @@ urlpatterns = [
     path('admin/', admin.site.urls),
     path('usuarios/', include('usuarios.urls')),
     path('', include('agendamentos.urls')),
-
-    path('profissionais/', ag_views.lista_profissionais, name='lista_profissionais'),
-    path('profissionais/novo/', ag_views.criar_profissional, name='criar_profissional'),
-    path('profissionais/<int:pk>/editar/', ag_views.editar_profissional, name='editar_profissional'),
-    path('profissionais/<int:pk>/excluir/', ag_views.excluir_profissional, name='excluir_profissional'),
     
 ]

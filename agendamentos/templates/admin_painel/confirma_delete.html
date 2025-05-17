@@ -1,0 +1,9 @@
+{% extends "admin_painel/base.html" %}
+{% block content %}
+<h2>Excluir {{ object }}</h2>
+<form method="post">{% csrf_token %}
+  <p>Confirma excluir?</p>
+  <button class="btn btn-danger">Sim, excluir</button>
+  <a href="{% url 'lista_profissionais' %}" class="btn btn-secondary">Cancelar</a>
+</form>
+{% endblock %}
