@@ -1,0 +1,66 @@
+/* === Cores base === */
+:root {
+  --bg-main:      #faeee7;
+  --txt-head:     #33272a;
+  --txt-body:     #594a4e;
+  --btn-bg:       #ff8ba7;
+  --btn-txt:      #33272a;
+  --border-dark:  #33272a;
+}
+
+/* === Background & texto global === */
+body {
+  background-color: var(--bg-main) !important;
+  color: var(--txt-body);
+  font-family: "Inter", sans-serif;
+}
+
+/* Headings */
+h1, h2, h3, h4, h5, h6 {
+  color: var(--txt-head);
+  font-weight: 700;
+}
+
+/* Links */
+a {
+  color: var(--btn-bg);
+}
+a:hover {
+  color: #ff6e90;
+}
+
+/* Buttons (override Bootstrap primary) */
+.btn-primary {
+  background-color: var(--btn-bg);
+  color: var(--btn-txt);
+  border-color: var(--btn-txt);
+}
+.btn-primary:hover,
+.btn-primary:focus {
+  background-color: #ff6e90;
+  border-color: var(--btn-txt);
+}
+
+/* Table and cards border color */
+.table,
+.card,
+.form-control,
+.btn,
+.dropdown-menu {
+  border-color: var(--border-dark) !important;
+}
+
+/* Navbar */
+.navbar {
+  background-color: var(--bg-main);
+  border-bottom: 2px solid var(--border-dark);
+}
+.navbar-brand,
+.nav-link,
+.dropdown-item {
+  color: var(--txt-head) !important;
+}
+.dropdown-item:hover {
+  background: var(--btn-bg);
+  color: var(--btn-txt) !important;
+}
