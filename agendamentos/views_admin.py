@@ -18,18 +18,18 @@ class Criar_profissional(LoginRequiredMixin, StaffOnlyMixin, CreateView):
     model = Profissional
     form_class = ProfissionalForm
     template_name = 'admin_painel/form.html'
-    success_url = reverse_lazy('prof_list')
+    success_url = reverse_lazy('lista_profissionais')
 
 class Editar_profissional(LoginRequiredMixin, StaffOnlyMixin, UpdateView):
     model = Profissional
     form_class = ProfissionalForm
     template_name = 'admin_painel/form.html'
-    success_url = reverse_lazy('prof_list')
+    success_url = reverse_lazy('lista_profissionais')
 
 class Excluir_profissional(LoginRequiredMixin, StaffOnlyMixin, DeleteView):
     model = Profissional
     template_name = 'admin_painel/confirm_delete.html'
-    success_url = reverse_lazy('prof_list')
+    success_url = reverse_lazy('lista_profissionais')
 
 
 """ @login_required

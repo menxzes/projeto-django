@@ -32,4 +32,7 @@ class AgendamentoForm(forms.ModelForm):
 class ProfissionalForm(forms.ModelForm):
     class Meta:
         model = Profissional
-        fields = ['usuario', 'especialidade']
+        fields = ['usuario', 'servico', 'horarios_disponiveis']
+        widgets = {
+            'horarios_disponiveis': forms.Textarea(attrs={'rows': 2})
+        }
