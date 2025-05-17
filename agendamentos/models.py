@@ -128,6 +128,13 @@ class Agendamento(models.Model):
         default='A'
     )
 
+    servico = models.ForeignKey(
+        Servico,
+        on_delete=models.CASCADE,
+        null=True,
+        blank=True,
+    )
+
     class Meta:
         verbose_name = 'Agendamento'
         verbose_name_plural = 'Agendamentos'

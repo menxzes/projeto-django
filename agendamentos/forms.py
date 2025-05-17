@@ -4,12 +4,11 @@ from .models import Agendamento
 from .models import Profissional
 
 class AgendamentoForm(forms.ModelForm):
-    def __init__(self, *args, **kwargs):
+    def __init__(self, *args, servico=None, **kwargs):
         super().__init__(*args, **kwargs)
-        self.fields['profissional'].label_from_instance = lambda obj: (
-            f"{obj.usuario.get_full_name() or obj.usuario.username} - {obj.servico.nome}"
-        )
-        self.fields['profissional'].empty_label = "Selecione um profissional"
+        if servico:
+            self.fields['profissional'].queryset = Profissional.objects.filter(servico=servico)
+            self.fields['horario'].choices = []
     
     def clean(self):
         cleaned_data =  super().clean()
@@ -27,7 +26,7 @@ class AgendamentoForm(forms.ModelForm):
         fields = ['profissional', 'data', 'horario']
         widgets = {
             'data': forms.DateInput(attrs={'type': 'date'}),
-            'horario': forms.Select(attrs={'disabled': True})
+            'horario': forms.Select()
         }
 
 class ProfissionalForm(forms.ModelForm):

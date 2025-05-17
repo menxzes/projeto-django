@@ -3,8 +3,7 @@
 {% block content %}
 <div class="container mt-4">
     <h2 class="mb-4">Agendar {{ servico.nome }}</h2>
-    
-    <!-- Mensagens de erro não associadas a campos específicos -->
+
     {% if form.non_field_errors %}
     <div class="alert alert-danger">
         {% for error in form.non_field_errors %}
@@ -17,15 +16,15 @@
         <div class="card-body">
             <form method="post" novalidate>
                 {% csrf_token %}
-                
+
                 <!-- Campo Profissional -->
                 <div class="mb-3">
                     <label for="id_profissional" class="form-label fw-bold">
                         <i class="bi bi-person-gear"></i> Profissional:
                     </label>
                     <select name="profissional" id="id_profissional" class="form-select {% if form.profissional.errors %}is-invalid{% endif %}">
-                        {% for choice in form.profissional.field.choices %}
-                            <option value="{{ choice.0 }}" {% if choice.0 == form.profissional.value %}selected{% endif %}>
+                        {% for choice in form.fields.profissional.choices %}
+                            <option value="{{ choice.0 }}" {% if form.cleaned_data.profissional|stringformat:"s" == choice.0|stringformat:"s" %}selected{% endif %}>
                                 {{ choice.1 }}
                             </option>
                         {% endfor %}
@@ -37,7 +36,7 @@
                     {% endif %}
                     <div class="form-text">Escolha o profissional desejado</div>
                 </div>
-                
+
                 <!-- Campo Data -->
                 <div class="mb-3">
                     <label for="id_data" class="form-label fw-bold">
@@ -55,18 +54,14 @@
                         </div>
                     {% endif %}
                 </div>
-                
+
                 <!-- Campo Horário -->
                 <div class="mb-3">
                     <label for="id_horario" class="form-label fw-bold">
                         <i class="bi bi-clock"></i> Horário:
                     </label>
                     <select name="horario" id="id_horario" class="form-select {% if form.horario.errors %}is-invalid{% endif %}" required>
-                        {% for choice in form.horario.field.choices %}
-                            <option value="{{ choice.0 }}" {% if choice.0 == form.horario.value %}selected{% endif %}>
-                                {{ choice.1 }}
-                            </option>
-                        {% endfor %}
+                        <option value="" disabled selected>Selecione um profissional e uma data</option>
                     </select>
                     {% if form.horario.errors %}
                         <div class="invalid-feedback">
@@ -74,7 +69,7 @@
                         </div>
                     {% endif %}
                 </div>
-                
+
                 <div class="d-grid gap-2 mt-4">
                     <button type="submit" class="btn btn-primary btn-lg">
                         <i class="bi bi-check-circle"></i> Confirmar Agendamento
@@ -83,7 +78,7 @@
             </form>
         </div>
     </div>
-    
+
     <div class="mt-3">
         <a href="{% url 'lista_servicos' %}" class="text-decoration-none">
             <i class="bi bi-arrow-left"></i> Voltar para serviços
@@ -98,18 +93,27 @@ document.addEventListener("DOMContentLoaded", function() {
     const horarioSelect = document.getElementById("id_horario");
     const dataInput = document.getElementById("id_data");
 
-    // Carrega horários quando profissional ou data mudam
     function carregarHorarios() {
         const profissionalId = profissionalSelect.value;
         const data = dataInput.value;
-        
-        if (!profissionalId || !data) return;
-        
+
+        horarioSelect.innerHTML = '';
+
+        if (!profissionalId || !data) {
+            const option = document.createElement("option");
+            option.value = "";
+            option.textContent = "Selecione um profissional e uma data";
+            option.disabled = true;
+            option.selected = true;
+            horarioSelect.appendChild(option);
+            return;
+        }
+
         fetch(`/api/horarios/?profissional_id=${profissionalId}&data=${data}`)
             .then(response => response.json())
             .then(data => {
                 horarioSelect.innerHTML = '';
-                
+
                 if (data.horarios && data.horarios.length > 0) {
                     data.horarios.forEach(hora => {
                         const option = document.createElement("option");
@@ -118,21 +122,35 @@ document.addEventListener("DOMContentLoaded", function() {
                         horarioSelect.appendChild(option);
                     });
                 } else {
-                    horarioSelect.innerHTML = '<option value="" disabled>Nenhum horário disponível</option>';
+                    const option = document.createElement("option");
+                    option.value = "";
+                    option.textContent = "Nenhum horário disponível";
+                    option.disabled = true;
+                    option.selected = true;
+                    horarioSelect.appendChild(option);
                 }
             })
             .catch(error => {
                 console.error("Erro:", error);
-                horarioSelect.innerHTML = '<option value="" disabled>Erro ao carregar</option>';
+                const option = document.createElement("option");
+                option.value = "";
+                option.textContent = "Erro ao carregar horários";
+                option.disabled = true;
+                option.selected = true;
+                horarioSelect.appendChild(option);
             });
     }
 
     profissionalSelect.addEventListener("change", carregarHorarios);
     dataInput.addEventListener("change", carregarHorarios);
+
+    // Carregar horários se já houver valores preenchidos
+    if (profissionalSelect.value && dataInput.value) {
+        carregarHorarios();
+    }
 });
 </script>
 
-<!-- Estilos customizados -->
 <style>
     .card {
         border-radius: 15px;

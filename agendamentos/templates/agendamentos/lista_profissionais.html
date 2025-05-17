@@ -1,0 +1,17 @@
+{% extends 'base.html' %}
+
+{% block content %}
+  <h2>Lista de Profissionais</h2>
+  <a href="{% url 'criar_profissional' %}">Adicionar novo profissional</a>
+  <ul>
+    {% for profissional in profissionais %}
+      <li>
+        {{ profissional.nome }} - {{ profissional.especialidade }}
+        [<a href="{% url 'editar_profissional' profissional.id %}">Editar</a>]
+        [<a href="{% url 'deletar_profissional' profissional.id %}">Excluir</a>]
+      </li>
+    {% empty %}
+      <li>Nenhum profissional cadastrado ainda.</li>
+    {% endfor %}
+  </ul>
+{% endblock %}

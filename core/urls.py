@@ -16,12 +16,20 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from core.views import redirecionar_por_tipo, index
-from usuarios.views import registro
+from core.views import index
+from agendamentos import views as ag_views
+from usuarios.views import AdminLoginRedirectView
 
 urlpatterns = [
-    path('', index, name='index'),  # <- colocar isso ANTES dos includes!
+    path('', index, name='index'),
+    path('admin/login/', AdminLoginRedirectView.as_view(), name='admin_login_redirect'),
     path('admin/', admin.site.urls),
-    path('agendamentos/', include('agendamentos.urls')),
     path('usuarios/', include('usuarios.urls')),
+    path('', include('agendamentos.urls')),
+
+    path('profissionais/', ag_views.lista_profissionais, name='lista_profissionais'),
+    path('profissionais/novo/', ag_views.criar_profissional, name='criar_profissional'),
+    path('profissionais/<int:pk>/editar/', ag_views.editar_profissional, name='editar_profissional'),
+    path('profissionais/<int:pk>/excluir/', ag_views.excluir_profissional, name='excluir_profissional'),
+    
 ]

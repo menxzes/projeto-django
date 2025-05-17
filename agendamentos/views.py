@@ -11,12 +11,13 @@ def lista_servicos(request):
     servicos = Servico.objects.filter(ativo=True)
     return render(request, 'agendamentos/lista_servicos.html', {'servicos': servicos})
 
+@login_required
 def horarios_disponiveis(request, servico_id):
     servico = get_object_or_404(Servico, id=servico_id)
     profissionais = Profissional.objects.filter(servico=servico)
 
     if request.method == 'POST':
-        form = AgendamentoForm(request.POST)
+        form = AgendamentoForm(request.POST, servico=servico)
         if form.is_valid():
             agendamento = form.save(commit=False)
             agendamento.cliente = request.user
@@ -24,7 +25,7 @@ def horarios_disponiveis(request, servico_id):
             agendamento.save()
             return redirect('lista_servicos')
     else:
-        form = AgendamentoForm()
+        form = AgendamentoForm(servico=servico)
     
     return render(request, 'agendamentos/horarios_disponiveis.html', {
         'hoje': timezone.now().date(),
@@ -59,7 +60,7 @@ def api_horarios(request):
 def meus_agendamentos(request):
     if request.user.is_staff:
         return redirect('admin:index')
-    agendamentos = Agendamento.objects.filter(cliente=request.user).order_by('data', 'horario')
+    agendamentos = Agendamento.objects.filter(cliente=request.user, status='A').order_by('data', 'horario')
     context = {
         'agendamentos': agendamentos
     }
@@ -91,10 +92,11 @@ def redirecionamento_pos_login(request):
 def is_admin(user):
     return user.is_authenticated and user.is_staff
 
+@login_required
 @user_passes_test(is_admin)
 def lista_profissionais(request):
-    profissionais = Profissional.objects.select_related('usuario').all()
-    return render(request, 'agendamentos/profissionais/lista.html', {'profissionais': profissionais})
+    profissionais = Profissional.objects.all()
+    return render(request, 'agendamentos/lista_profissionais.html', {'profissionais': profissionais})
 
 @user_passes_test(is_admin)
 def criar_profissional(request):
@@ -126,3 +128,6 @@ def excluir_profissional(request, profissional_id):
         profissional.delete()
         return redirect('lista_profissionais')
     return render(request, 'agendamentos/profissionais/confirmar_exclusao.html', {'profissional': profissional})
+
+def funcionario_required(view_func):
+    return login_required(user_passes_test(lambda u: u.is_staff)(view_func))
